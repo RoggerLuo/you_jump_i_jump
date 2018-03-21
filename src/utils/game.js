@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import Camera from './camera'
 import Cube from './cube'
+import Jumper from './jumper'
 
 function Game() {
     // 基本参数
@@ -9,10 +10,6 @@ function Game() {
         background: '#CCCEDA', // 背景颜色 0x282828
         ground: -1, // 地面y坐标
         fallingSpeed: 0.2, // 游戏npm失败掉落速度
-        jumperColor: 0x232323,
-        jumperWidth: 1, // jumper宽度
-        jumperHeight: 2, // jumper高度
-        jumperDeep: 1, // jumper深度
     }
     // 游戏状态
     this.score = 0
@@ -23,15 +20,6 @@ function Game() {
     this.scene = new THREE.Scene()
     this.renderer = new THREE.WebGLRenderer({ antialias: true })
 
-    // this.cubes = [] // 方块数组
-    // this.cubeStat = {
-    //     nextDir: '' // 下一个方块相对于当前方块的方向: 'left' 或 'right'
-    // }
-    this.jumperStat = {
-        ready: false, // 鼠标按完没有
-        xSpeed: 0, // xSpeed根据鼠标按的时间进行赋值
-        ySpeed: 0 // ySpeed根据鼠标按的时间进行赋值
-    }
     this.falledStat = {
         location: -1, // jumper所在的位置
         distance: 0 // jumper和最近方块的距离
@@ -47,6 +35,9 @@ function Game() {
 
     this.Cube = Cube
     this.Cube.init(this.scene,this.Camera)
+
+    this.Jumper = Jumper
+    this.Jumper.init(this.scene)
 }
 
 Game.prototype = {
@@ -57,7 +48,7 @@ Game.prototype = {
         this._setLight() // 设置光照
         this.Cube.add() // 加一个方块
         this.Cube.add() // 再加一个方块
-        this._createJumper() // 加入游戏者jumper
+        this.Jumper.create() // 加入游戏者jumper
         this.Camera.update() // 更新相机坐标
         this._listen()
     },
@@ -93,12 +84,12 @@ Game.prototype = {
             end: false
         }
         this.Cube.removeAll()
-        this.scene.remove(this.jumper)
+        this.scene.remove(this.Jumper.jumper)
         // 显示的分数设为 0
         this.successCallback(this.score)
         this.Cube.add()
         this.Cube.add()
-        this._createJumper()
+        this.Jumper.create()
         this.Camera.update() // 更新相机坐标
 
     },
@@ -135,58 +126,35 @@ Game.prototype = {
      *@return {Number} this.jumperStat.xSpeed 水平方向上的速度
      *@return {Number} this.jumperStat.ySpeed 垂直方向上的速度
      **/
-    _handleMousedown: function() {
-        var self = this
-        if (!self.jumperStat.ready && self.jumper.scale.y > 0.02) {
-            self.jumper.scale.y -= 0.01
-            self.jumperStat.xSpeed += 0.004
-            self.jumperStat.ySpeed += 0.008
-            self._render(self.scene, self.Camera.camera)
-            requestAnimationFrame(function() {
-                self._handleMousedown()
-            })
-        }
-    },
-
+   _handleMousedown: function() {
+       const self = this
+       //这个scale属性是高度，按得越久高度越矮
+       Jumper.press(()=>{
+           self._render(self.scene, self.Camera.camera) //这个render要改
+           requestAnimationFrame(function() {
+               self._handleMousedown()
+           })
+       })
+   },
     // 鼠标松开或触摸结束绑定的函数
     _handleMouseup: function() {
-        var self = this
-        // 标记鼠标已经松开
-        self.jumperStat.ready = true
-        // 判断jumper是在方块水平面之上，是的话说明需要继续运动
-        if (self.jumper.position.y >= 1) {
-            // jumper根据下一个方块的位置来确定水平运动方向
-            if (self.Cube.nextDir === 'left') {
-                self.jumper.position.x -= self.jumperStat.xSpeed
-            } else {
-                self.jumper.position.z -= self.jumperStat.xSpeed
-            }
-            // jumper在垂直方向上运动
-            self.jumper.position.y += self.jumperStat.ySpeed
-            // 运动伴随着缩放
-            if (self.jumper.scale.y < 1) {
-                self.jumper.scale.y += 0.02
-            }
-            // jumper在垂直方向上先上升后下降
-            self.jumperStat.ySpeed -= 0.01
+        const self = this
+        const direction = self.Cube.nextDir
+        self.Jumper.up(direction,flying,landing)
+        function flying(){
             // 每一次的变化，渲染器都要重新渲染，才能看到渲染效果
             self._render(self.scene, self.Camera.camera)
             requestAnimationFrame(function() {
                 self._handleMouseup()
             })
-        } else {
-            // jumper掉落到方块水平位置，开始充值状态，并开始判断掉落是否成功
-            self.jumperStat.ready = false
-            self.jumperStat.xSpeed = 0
-            self.jumperStat.ySpeed = 0
-            self.jumper.position.y = 1
+        }
+        function landing(){
             self._checkInCube()
             if (self.falledStat.location === 1) {
                 // 掉落成功，进入下一步
                 self.score++
                 self.Cube.add()
                 self.Camera.update() // 更新相机坐标
-
                 if (self.successCallback) {
                     self.successCallback(self.score)
                 }
@@ -196,67 +164,72 @@ Game.prototype = {
             }
         }
     },
-    /**
-     *游戏失败执行的碰撞效果
-     *@param {String} dir 传入一个参数用于控制倒下的方向：'rightTop','rightBottom','leftTop','leftBottom','none'
-     **/
-    _fallingRotate: function(dir) {
-        var self = this
-        var offset = self.falledStat.distance - self.Cube.size.width / 2
-        var rotateAxis = 'z' // 旋转轴
-        var rotateAdd = self.jumper.rotation[rotateAxis] + 0.1 // 旋转速度
-        var rotateTo = self.jumper.rotation[rotateAxis] < Math.PI / 2 // 旋转结束的弧度
-        var fallingTo = self.config.ground + self.config.jumperWidth / 2 + offset
 
-        if (dir === 'rightTop') {
-            rotateAxis = 'x'
-            rotateAdd = self.jumper.rotation[rotateAxis] - 0.1
-            rotateTo = self.jumper.rotation[rotateAxis] > -Math.PI / 2
-            self.jumper.geometry.translate.z = offset
-        } else if (dir === 'rightBottom') {
-            rotateAxis = 'x'
-            rotateAdd = self.jumper.rotation[rotateAxis] + 0.1
-            rotateTo = self.jumper.rotation[rotateAxis] < Math.PI / 2
-            self.jumper.geometry.translate.z = -offset
-        } else if (dir === 'leftBottom') {
-            rotateAxis = 'z'
-            rotateAdd = self.jumper.rotation[rotateAxis] - 0.1
-            rotateTo = self.jumper.rotation[rotateAxis] > -Math.PI / 2
-            self.jumper.geometry.translate.x = -offset
-        } else if (dir === 'leftTop') {
-            rotateAxis = 'z'
-            rotateAdd = self.jumper.rotation[rotateAxis] + 0.1
-            rotateTo = self.jumper.rotation[rotateAxis] < Math.PI / 2
-            self.jumper.geometry.translate.x = offset
-        } else if (dir === 'none') {
-            rotateTo = false
-            fallingTo = self.config.ground
-        } else {
-            throw Error('Arguments Error')
-        }
-        if (!self.fallingStat.end) {
-            if (rotateTo) {
-                self.jumper.rotation[rotateAxis] = rotateAdd
-            } else if (self.jumper.position.y > fallingTo) {
-                self.jumper.position.y -= self.config.fallingSpeed
-            } else {
-                self.fallingStat.end = true
-            }
-            self._render()
-            requestAnimationFrame(function() {
-                self._falling()
-            })
-        } else {
-            if (self.failedCallback) {
-                self.failedCallback()
-            }
-        }
-    },
+  /**
+   *游戏失败执行的碰撞效果
+   *@param {String} dir 传入一个参数用于控制倒下的方向：'rightTop','rightBottom','leftTop','leftBottom','none'
+   **/
+  _fallingRotate: function(dir) {
+      var self = this
+      const j = self.Jumper.jumper
+
+      var offset = self.falledStat.distance - self.Cube.size.width / 2
+      var rotateAxis = 'z' // 旋转轴
+      var rotateAdd = j.rotation[rotateAxis] + 0.1 // 旋转速度
+      var rotateTo = j.rotation[rotateAxis] < Math.PI / 2 // 旋转结束的弧度
+      var fallingTo = self.config.ground + self.config.jumperWidth / 2 + offset
+
+      if (dir === 'rightTop') {
+          rotateAxis = 'x'
+          rotateAdd = j.rotation[rotateAxis] - 0.1
+          rotateTo = j.rotation[rotateAxis] > -Math.PI / 2
+          j.geometry.translate.z = offset
+      } else if (dir === 'rightBottom') {
+          rotateAxis = 'x'
+          rotateAdd = j.rotation[rotateAxis] + 0.1
+          rotateTo = j.rotation[rotateAxis] < Math.PI / 2
+          j.geometry.translate.z = -offset
+      } else if (dir === 'leftBottom') {
+          rotateAxis = 'z'
+          rotateAdd = j.rotation[rotateAxis] - 0.1
+          rotateTo = j.rotation[rotateAxis] > -Math.PI / 2
+          j.geometry.translate.x = -offset
+      } else if (dir === 'leftTop') {
+          rotateAxis = 'z'
+          rotateAdd = j.rotation[rotateAxis] + 0.1
+          rotateTo = j.rotation[rotateAxis] < Math.PI / 2
+          j.geometry.translate.x = offset
+      } else if (dir === 'none') {
+          rotateTo = false
+          fallingTo = self.config.ground
+      } else {
+          throw Error('Arguments Error')
+      }
+      if (!self.fallingStat.end) {
+          if (rotateTo) {
+              j.rotation[rotateAxis] = rotateAdd
+          } else if (j.position.y > fallingTo) {
+              j.position.y -= self.config.fallingSpeed
+          } else {
+              self.fallingStat.end = true
+          }
+          self._render()
+          requestAnimationFrame(function() {
+              self._falling()
+          })
+      } else {
+          if (self.failedCallback) {
+              self.failedCallback()
+          }
+      }
+  },
+
     /**
      *游戏失败进入掉落阶段
      *通过确定掉落的位置来确定掉落效果
      **/
     _falling: function() {
+        const j = this.Jumper.jumper
         var self = this
         if (self.falledStat.location === 0) {
             self._fallingRotate('none')
@@ -270,13 +243,13 @@ Game.prototype = {
 
             const lastCube = self.Cube.getLast()
             if (self.Cube.nextDir === 'left') {
-                if (self.jumper.position.x < lastCube.position.x) {
+                if (j.position.x < lastCube.position.x) {
                     self._fallingRotate('leftTop')
                 } else {
                     self._fallingRotate('leftBottom')
                 }
             } else {
-                if (self.jumper.position.z < lastCube.position.z) {
+                if (j.position.z < lastCube.position.z) {
                     self._fallingRotate('rightTop')
                 } else {
                     self._fallingRotate('rightBottom')
@@ -296,9 +269,9 @@ Game.prototype = {
     _checkInCube: function() {
         if (this.Cube.cubes.length > 1) {
             // jumper 的位置
-            var pointO = {
-                x: this.jumper.position.x,
-                z: this.jumper.position.z
+            var pointO ={// this.Jumper.jumper.position
+                x: this.Jumper.jumper.position.x,
+                z: this.Jumper.jumper.position.z
             }
             const lastCube = this.Cube.getLast()
             const lastX2Cube = this.Cube.getLastX2()
@@ -323,7 +296,7 @@ Game.prototype = {
                 distanceS = Math.abs(pointO.z - pointA.z)
                 distanceL = Math.abs(pointO.z - pointB.z)
             }
-            var should = this.Cube.size.width / 2 + this.config.jumperWidth / 2
+            var should = this.Cube.size.width / 2 + this.Jumper.size.width / 2
             var result = 0
 
             if (distanceS < should) {
@@ -343,20 +316,6 @@ Game.prototype = {
             this.falledStat.location = result
         }
     },
-
-
-    // 基于更新后的摄像机位置，重新设置摄
-    // 初始化jumper：游戏主角
-    _createJumper: function() {
-        var material = new THREE.MeshLambertMaterial({ color: this.config.jumperColor })
-        var geometry = new THREE.CubeGeometry(this.config.jumperWidth, this.config.jumperHeight, this.config.jumperDeep)
-        geometry.translate(0, 1, 0)
-        var mesh = new THREE.Mesh(geometry, material)
-        mesh.position.y = 1
-        this.jumper = mesh
-        this.scene.add(this.jumper)
-    },
- 
     _render: function() {
         this.Camera.render()
     },
