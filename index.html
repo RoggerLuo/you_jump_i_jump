@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>跳一跳</title>
+  <meta name="viewport" content="width=device-width, maximum-scale=1, user-scalable=no">
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <div class="mask start">
+    <div class="mask-title">跳一跳</div>
+    <div class="mask-btn btn-game-start">开始游戏</div>
+    <div class="mask-order">排行榜</div>
+  </div>
+  <div class="mask restart">
+    <div class="mask-text">本次得分</div>
+    <div class="mask-score">0</div>
+    <div class="mask-rank">
+      <div class="rank-header">
+        <div class="rank-header-tips">排行榜 • 每周一凌晨刷新</div>
+        <div class="rank-header-go">查看全部排行</div>
+      </div>
+      <div class="rank-inner">
+        <div class="rank-inner-user">
+          <div class="user-ranking">1</div>
+          <div class="user-avatar"></div>
+          <div class="user-name">章三</div>
+          <div class="user-order">751</div>
+        </div>
+        <div class="rank-inner-user">
+          <div class="user-ranking">2</div>
+          <div class="user-avatar"></div>
+          <div class="user-name">里斯</div>
+          <div class="user-order">551</div>
+        </div>
+        <div class="rank-inner-user">
+          <div class="user-ranking">3</div>
+          <div class="user-avatar"></div>
+          <div class="user-name">王五</div>
+          <div class="user-order">351</div>
+        </div>
+      </div>
+    </div>
+    <div class="mask-btn btn-game-restart">再玩一局</div>
+    <div class="mask-history">历史最高分：<span class="mask-history-score">1135</span></div>
+  </div>
+  <div class="game">
+    <div class="game-score">0</div>
+    <div class="game-inner"></div>
+  </div>
+  <script type="text/javascript" src="main.js"></script>
+</body>
+</html>
