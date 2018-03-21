@@ -41,18 +41,12 @@ function Game() {
         end: false // 掉到地面没有
     }
 
-    const cubeSize = {
-        width: 4, // 方块宽度
-        height: 2, // 方块高度
-        deep: 4, // 方块深度        
-    }
-
 
     this.Camera = Camera
     this.Camera.init(this.size,this.renderer,this.scene)
 
     this.Cube = Cube
-    this.Cube.init(cubeSize,this.scene,this.Camera)
+    this.Cube.init(this.scene,this.Camera)
 }
 
 Game.prototype = {
@@ -99,12 +93,6 @@ Game.prototype = {
             end: false
         }
         this.Cube.removeAll()
-        // 删除所有方块
-        // var length = this.cubes.length
-        // for (var i = 0; i < length; i++) {
-        //     this.scene.remove(this.cubes.pop())
-        // }
-        // 删除jumper
         this.scene.remove(this.jumper)
         // 显示的分数设为 0
         this.successCallback(this.score)
@@ -279,14 +267,16 @@ Game.prototype = {
                 self._fallingRotate('rightTop')
             }
         } else if (self.falledStat.location === 10) {
+
+            const lastCube = self.Cube.getLast()
             if (self.Cube.nextDir === 'left') {
-                if (self.jumper.position.x < self.cubes[self.cubes.length - 1].position.x) {
+                if (self.jumper.position.x < lastCube.position.x) {
                     self._fallingRotate('leftTop')
                 } else {
                     self._fallingRotate('leftBottom')
                 }
             } else {
-                if (self.jumper.position.z < self.cubes[self.cubes.length - 1].position.z) {
+                if (self.jumper.position.z < lastCube.position.z) {
                     self._fallingRotate('rightTop')
                 } else {
                     self._fallingRotate('rightBottom')
@@ -310,15 +300,18 @@ Game.prototype = {
                 x: this.jumper.position.x,
                 z: this.jumper.position.z
             }
+            const lastCube = this.Cube.getLast()
+            const lastX2Cube = this.Cube.getLastX2()
+
             // 当前方块的位置
             var pointA = {
-                x: this.Cube.cubes[this.Cube.cubes.length - 1 - 1].position.x,
-                z: this.Cube.cubes[this.Cube.cubes.length - 1 - 1].position.z
+                x: lastX2Cube.position.x,
+                z: lastX2Cube.position.z
             }
             // 下一个方块的位置
             var pointB = {
-                x: this.Cube.cubes[this.Cube.cubes.length - 1].position.x,
-                z: this.Cube.cubes[this.Cube.cubes.length - 1].position.z
+                x: lastCube.position.x,
+                z: lastCube.position.z
             }
             var distanceS, // jumper和当前方块的坐标轴距离
                 distanceL // jumper和下一个方块的坐标轴距离

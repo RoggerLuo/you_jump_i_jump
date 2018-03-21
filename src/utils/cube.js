@@ -3,14 +3,22 @@ import * as THREE from 'three'
 // 依赖scene
 
 export default {
+    size:{
+        width: 4, // 方块宽度
+        height: 2, // 方块高度
+        deep: 4, // 方块深度        
+    },
     cubes:[],
     nextDir:'',
-    last:undefined,
-    lastX2:undefined,
-    init(size,scene,Camera){
+    init(scene,Camera){
         this.scene = scene
-        this.size = size
         this.Camera = Camera
+    },
+    getLast(){
+        return this.cubes[this.cubes.length - 1]
+    },
+    getLastX2(){
+        return this.cubes[this.cubes.length - 2]
     },
     removeAll(){
         var length = this.cubes.length
