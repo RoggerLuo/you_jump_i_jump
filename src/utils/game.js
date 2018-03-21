@@ -202,7 +202,7 @@ Game.prototype = {
      **/
     _fallingRotate: function(dir) {
         var self = this
-        var offset = self.falledStat.distance - self.config.cubeWidth / 2
+        var offset = self.falledStat.distance - self.Cube.size.width / 2
         var rotateAxis = 'z' // 旋转轴
         var rotateAdd = self.jumper.rotation[rotateAxis] + 0.1 // 旋转速度
         var rotateTo = self.jumper.rotation[rotateAxis] < Math.PI / 2 // 旋转结束的弧度
