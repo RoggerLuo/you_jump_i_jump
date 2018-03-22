@@ -14,10 +14,10 @@ export default {
         this.scene = scene
         this.Camera = Camera
     },
-    getLast(){
+    getCurrent(){
         return this.cubes[this.cubes.length - 1]
     },
-    getLastX2(){
+    getLast(){
         return this.cubes[this.cubes.length - 2]
     },
     removeAll(){

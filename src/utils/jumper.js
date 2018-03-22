@@ -38,19 +38,23 @@ export default {
                 ySpeed, 这个决定了它可以跳多高，
                 也决定了它置空的时间,
                 所以也作为一部分因素 决定了它会跑多远, 时间x速度 = 水平距离
+
+                原x的速度，是三角形abc最长边c的速度,
+                求出a和b和c的比例，就能求出x和z方向的分速度,
+
             */
-            cb()
+            cb(self.status.xSpeed)
         }
     },
     isFlying(){
         return this.jumper.position.y >= 1
     },
-    up(direction,flying_cb,landing_cb){
+    up(Guide,flying_cb,landing_cb){
         // 标记鼠标已经松开
         this.status.ready = true
         // 判断jumper是在方块水平面之上，是的话说明需要继续运动
         if (this.isFlying()) {
-            this.horizontalPosChange(direction)
+            this.horizontalPosChange(Guide)
             this.verticalPosChange()
             flying_cb()
         }else{
@@ -64,13 +68,9 @@ export default {
             landing_cb()
         }
     },
-    horizontalPosChange(direction){
-        // jumper根据下一个方块的位置来确定 水平运动方向
-        if (direction === 'left') {
-            this.jumper.position.x -= this.status.xSpeed
-        } else {
-            this.jumper.position.z -= this.status.xSpeed
-        }
+    horizontalPosChange(Guide){
+        this.jumper.position.x -= Guide.x
+        this.jumper.position.z -= Guide.z
     },
     verticalPosChange(){
         // jumper在垂直方向上运动

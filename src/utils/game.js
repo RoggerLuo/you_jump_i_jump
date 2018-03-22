@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import Camera from './camera'
 import Cube from './cube'
 import Jumper from './jumper'
+import Guide from './guide'
 
 function Game() {
     // 基本参数
@@ -38,6 +39,7 @@ function Game() {
 
     this.Jumper = Jumper
     this.Jumper.init(this.scene)
+    this.Guide = Guide
 }
 
 Game.prototype = {
@@ -64,10 +66,12 @@ Game.prototype = {
         // 事件绑定到canvas中
         var canvas = document.querySelector('canvas')
         canvas.addEventListener(mouseEvents.down, function() {
+            self.Guide.computeProportion(self.Cube,self.Jumper)
             self._handleMousedown()
         })
         // 监听鼠标松开的事件
         canvas.addEventListener(mouseEvents.up, function(evt) {
+            self.Guide.computeXZ()
             self._handleMouseup()
         })
         // 监听窗口变化的事件
@@ -129,18 +133,19 @@ Game.prototype = {
    _handleMousedown: function() {
        const self = this
        //这个scale属性是高度，按得越久高度越矮
-       Jumper.press(()=>{
-           self._render(self.scene, self.Camera.camera) //这个render要改
-           requestAnimationFrame(function() {
-               self._handleMousedown()
-           })
+       Jumper.press((xSpeed)=>{
+          self.Guide.xSpeed = xSpeed
+          self._render(self.scene, self.Camera.camera) //这个render要改
+          requestAnimationFrame(function() {
+             self._handleMousedown()
+          })
        })
    },
     // 鼠标松开或触摸结束绑定的函数
     _handleMouseup: function() {
         const self = this
-        const direction = self.Cube.nextDir
-        self.Jumper.up(direction,flying,landing)
+        // const direction = self.Cube.nextDir
+        self.Jumper.up(this.Guide,flying,landing)
         function flying(){
             // 每一次的变化，渲染器都要重新渲染，才能看到渲染效果
             self._render(self.scene, self.Camera.camera)
@@ -241,7 +246,7 @@ Game.prototype = {
             }
         } else if (self.falledStat.location === 10) {
 
-            const lastCube = self.Cube.getLast()
+            const lastCube = self.Cube.getCurrent()
             if (self.Cube.nextDir === 'left') {
                 if (j.position.x < lastCube.position.x) {
                     self._fallingRotate('leftTop')
@@ -273,8 +278,8 @@ Game.prototype = {
                 x: this.Jumper.jumper.position.x,
                 z: this.Jumper.jumper.position.z
             }
-            const lastCube = this.Cube.getLast()
-            const lastX2Cube = this.Cube.getLastX2()
+            const lastCube = this.Cube.getCurrent()
+            const lastX2Cube = this.Cube.getLast()
 
             // 当前方块的位置
             var pointA = {
