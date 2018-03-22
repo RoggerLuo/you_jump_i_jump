@@ -44,6 +44,7 @@ export default {
         //设置位置
         if (this.cubes.length >= 1) {
             const last = this.cubes[this.cubes.length - 1]
+
             mesh.position.x = last.position.x
             mesh.position.z = last.position.z
             const randomDistance = 4 * Math.random() + 6

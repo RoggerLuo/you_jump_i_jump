@@ -25,6 +25,9 @@ export default {
     update(){
         const { current, next } = this.pos
         const needUpdate = current.x > next.x || current.z > next.z
+        const x = current.x
+        const z = current.z
+
         if(needUpdate){
             current.x -= 0.17
             current.z -= 0.17
@@ -36,6 +39,15 @@ export default {
                 current.z = next.z
             }
             this.camera.lookAt(new THREE.Vector3(current.x, 0, current.z))
+            /* 增加一个set */
+            this.camera.position.set(current.x+100, 100, current.z+100)
+            /* 
+                somehow, 就算camera离方块很远, 但是视角也不会变小，可能是其他某个地方设置的效果？
+                所以，会变扁是因为，
+                xyz中,lookAt的x和z增加了，虽然set的y不变，但导致观察的角度变低了，
+                关键confuse的地方时，camera拉拉远了，可是视图区域却没有变小，违背了近大远小的常理，所以不好理解
+            */
+
             this.render()
             requestAnimationFrame(()=>this.update())
         }
@@ -59,5 +71,6 @@ export default {
         pointR.y = 0
         pointR.z = (pointA.z + pointB.z) / 2
         this.pos.next = pointR
+
     }
 }

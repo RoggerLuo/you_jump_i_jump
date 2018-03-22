@@ -32,13 +32,13 @@ export default {
         if (!self.status.ready && self.jumper.scale.y > 0.02) { 
             self.jumper.scale.y -= 0.01
             // self.status.xSpeed += 0.006 //线性 增加速度 //0.004
-            speedUpAlgorithm(self.status)
+            xSpeedAlgorithm(self.status)
+            self.status.ySpeed += 0.010
             /* 
-                线性的ySpeed, 这个决定了它可以跳多高，
+                ySpeed, 这个决定了它可以跳多高，
                 也决定了它置空的时间,
                 所以也作为一部分因素 决定了它会跑多远, 时间x速度 = 水平距离
             */
-            self.status.ySpeed += 0.016
             cb()
         }
     },
@@ -87,38 +87,35 @@ export default {
 }
 
 const curveFunc = x => { //曲线正比例函数
-    //y=(log(x/2+0.01))/2 + 1
-    // return Math.log(x/2+0.01)/2 + 1 
-    return Math.log(x) + 2
+    //y=log(x+0.1) +1
+    return Math.log(x+0.1) + 1
 }
-function speedUpAlgorithm(status){
+function xSpeedAlgorithm(status){
     status.counter += 1
-    // status.xSpeed += 0.006
-    
-    /*
-        最后xSpeed累积到0.18的时候是最通用的距离，
-        0.18/0.006 = 30个count
-    */
-
-    /*
-        max y=3.3
-
-        x: 0~10 , 
-        y: 0~3,
-        x=5.1, y=2.7 的时候变化率开始大程度衰减
-
-        so, y=2.7, 应该调整成0.18   
-        so, curveFunc/2.7 * 0.18
-
-
-        30个count为 x=5.1
-        1个count为 5.1/30
-    */
     const x_levarage = 5.1/30
-    const y_levarage = 0.18/3.8
+    const y_levarage = 0.35/3.8
     status.xSpeed = y_levarage*curveFunc(status.counter*x_levarage)
 }
+// status.xSpeed += 0.006
 
+/*
+    最后xSpeed累积到0.18的时候是最通用的距离，
+    0.18/0.006 = 30个count
+*/
+
+/*
+    max y=3.3
+
+    x: 0~10 , 
+    y: 0~3,
+    x=5.1, y=2.7 的时候变化率开始大程度衰减
+
+    so, y=2.7, 应该调整成0.18   
+    so, curveFunc/2.7 * 0.18
+
+    30个count为 x=5.1
+    1个count为 5.1/30
+*/
 
 
 
