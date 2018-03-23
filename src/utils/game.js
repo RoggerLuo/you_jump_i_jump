@@ -66,11 +66,19 @@ Game.prototype = {
         // 事件绑定到canvas中
         var canvas = document.querySelector('canvas')
         canvas.addEventListener(mouseEvents.down, function() {
+            self.Jumper.jumper.geometry.translate(0, 1, 0)
+            self.Jumper.jumper.position.y = 1
+
             self.Guide.computeProportion(self.Cube,self.Jumper)
             self._handleMousedown()
+
+
         })
         // 监听鼠标松开的事件
         canvas.addEventListener(mouseEvents.up, function(evt) {
+            self.Jumper.jumper.geometry.translate(0, -1, 0)
+            self.Jumper.jumper.position.y = 2
+
             self.Guide.computeXZ()
             self._handleMouseup()
         })
@@ -144,8 +152,8 @@ Game.prototype = {
     // 鼠标松开或触摸结束绑定的函数
     _handleMouseup: function() {
         const self = this
-        // const direction = self.Cube.nextDir
-        self.Jumper.up(this.Guide,flying,landing)
+        const direction = self.Cube.nextDir
+        self.Jumper.up(direction,this.Guide,flying,landing)
         function flying(){
             // 每一次的变化，渲染器都要重新渲染，才能看到渲染效果
             self._render(self.scene, self.Camera.camera)
