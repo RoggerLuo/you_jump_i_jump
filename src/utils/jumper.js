@@ -30,7 +30,7 @@ export default {
     },
     verticalPosChange(){
         // jumper在垂直方向上运动
-        this.jumper.position.y += this.status.ySpeed
+        // this.jumper.position.y += this.status.ySpeed
 
         //还原jumper的高度
         if (this.jumper.scale.y < 1) {
@@ -49,61 +49,43 @@ export default {
     press(cb){
         const self = this
         if (!self.status.ready && self.jumper.scale.y > 0.02) { 
-            self.jumper.scale.y -= 0.01
-
+            // self.jumper.scale.y -= 0.01
+            // self.status.ySpeed += 0.01
+            cb(self.status.xSpeed)
             // xSpeedAlgorithm(self.status)
             // self.Guide.xSpeed = xSpeed
-
-
             // self.status.compress -= 0.005
-            // console.log('self.jumper.scale.y',self.jumper.scale.y)
-            // console.log('this.status.compress',this.status.compress)
 
             // self.jumper.geometry.translate(0, self.status.compress, 0)
-            // self.status.xSpeed += 0.006 //线性 增加速度 //0.004
-            self.status.ySpeed += 0.01
-            /* 
-                ySpeed, 这个决定了它可以跳多高，
-                也决定了它置空的时间,
-                所以也作为一部分因素 决定了它会跑多远, 时间x速度 = 水平距离
-
-                原x的速度，是三角形abc最长边c的速度,
-                求出a和b和c的比例，就能求出x和z方向的分速度,
-
-            */
-            
-            cb(self.status.xSpeed)
+            // self.status.xSpeed += 0.006 //线性 增加速度 //0.004            
         }
     },
     isFlying(){
         return this.jumper.position.y >= 2
     },
     up(direction,Guide,flying_cb,landing_cb){
-        // this.jumper.geometry.translate(0, 0, 0)
-        // this.jumper.position.y = 2
-
         // 标记鼠标已经松开
         this.status.ready = true
         // 判断jumper是在方块水平面之上，是的话说明需要继续运动
         if (this.isFlying()) {
-            this.horizontalPosChange(Guide)
-            this.verticalPosChange()
+            // this.horizontalPosChange(Guide)
+            // this.verticalPosChange()
             this.airRotate(direction)
-            flying_cb()
+            // flying_cb()
         }else{
             // jumper掉落到方块水平位置，开始充值状态，并开始判断掉落是否成功
-            this.status.ready = false
-            this.status.xSpeed = 0
-            this.status.ySpeed = 0
-            this.status.counter = 0 // 新增计数器
-            this.jumper.position.y = 2
-            landing_cb()
+            // this.status.ready = false
+            // this.status.xSpeed = 0
+            // this.status.ySpeed = 0
+            // this.status.counter = 0 // 新增计数器
+            // this.jumper.position.y = 2
+            // landing_cb()
         }
     },
-    horizontalPosChange(Guide){
-        this.jumper.position.x -= Guide.x
-        this.jumper.position.z -= Guide.z
-    },
+    // horizontalPosChange(Guide){
+    //     this.jumper.position.x -= Guide.x
+    //     this.jumper.position.z -= Guide.z
+    // },
     
     airRotate(dir) { //t为总帧数
         /*
@@ -142,19 +124,19 @@ export default {
 
 }
 
-const curveFunc = x => { //曲线正比例函数
-    if(x>1){
-        return Math.logx + 1        
-    }else{
-        return Math.pow(x,3)
-    }
-}
-function xSpeedAlgorithm(status){
-    status.counter += 1
-    const x_levarage = 5.1/30
-    const y_levarage = 0.35/3.8
-    status.xSpeed = y_levarage*curveFunc(status.counter*x_levarage)
-}
+// const curveFunc = x => { //曲线正比例函数
+//     if(x>1){
+//         return Math.logx + 1        
+//     }else{
+//         return Math.pow(x,3)
+//     }
+// }
+// function xSpeedAlgorithm(status){
+//     status.counter += 1
+//     const x_levarage = 5.1/30
+//     const y_levarage = 0.35/3.8
+//     status.xSpeed = y_levarage*curveFunc(status.counter*x_levarage)
+// }
 // status.xSpeed += 0.006
 
 /*

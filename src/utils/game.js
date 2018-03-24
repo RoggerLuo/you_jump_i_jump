@@ -3,7 +3,7 @@ import Camera from './camera'
 import Cube from './cube'
 import Jumper from './jumper'
 import Guide from './guide'
-import Time from './Time'
+import Jump from './Jump'
 
 function Game() {
     // 基本参数
@@ -38,10 +38,9 @@ function Game() {
     this.Cube = Cube
     this.Cube.init(this.scene,this.Camera)
 
-    this.Jumper = Jumper
-    this.Jumper.init(this.scene)
+
     this.Guide = Guide
-    this.Time = Time
+    
 }
 
 Game.prototype = {
@@ -52,7 +51,14 @@ Game.prototype = {
         this._setLight() // 设置光照
         this.Cube.add() // 加一个方块
         this.Cube.add() // 再加一个方块
+        
+        this.Jumper = Jumper
+        this.Jumper.init(this.scene)
         this.Jumper.create() // 加入游戏者jumper
+        
+        this.Jump = Jump
+        this.Jump.init(this.Jumper.jumper,this.Cube)
+
         this.Camera.update() // 更新相机坐标
         this._listen()
     },
@@ -68,22 +74,16 @@ Game.prototype = {
         // 事件绑定到canvas中
         var canvas = document.querySelector('canvas')
         canvas.addEventListener(mouseEvents.down, function() {
-            self.Time.clear()
-
-            self.Jumper.jumper.geometry.translate(0, 1, 0)
-            self.Jumper.jumper.position.y = 1
-
-            self.Guide.computeProportion(self.Cube,self.Jumper)
+            // self.Time.clear()
+            // self.Jumper.jumper.geometry.translate(0, 1, 0)
+            // self.Jumper.jumper.position.y = 1
+            // self.Guide.computeProportion(self.Cube,self.Jumper)
+            self.Jump.onPress()
             self._handleMousedown()
-
-
         })
         // 监听鼠标松开的事件
         canvas.addEventListener(mouseEvents.up, function(evt) {
-            self.Jumper.jumper.geometry.translate(0, -1, 0)
-            self.Jumper.jumper.position.y = 2
-
-            self.Guide.computeXZ()
+            self.Jump.onUp()
             self._handleMouseup()
         })
         // 监听窗口变化的事件
@@ -93,32 +93,30 @@ Game.prototype = {
     },
     _handleMousedown: function() {
        const self = this
-       //这个scale属性是高度，按得越久高度越矮
-        Jumper.press((xSpeed)=>{
-           
-            self.Time.record()           
-            self._render(self.scene, self.Camera.camera) //这个render要改
-            requestAnimationFrame(function() {
-                self._handleMousedown()
-            })
-        })
+       self.Jump.duringPressing(()=>{
+           self._render() 
+           requestAnimationFrame(function() {
+               self._handleMousedown()
+           })
+       })
     },
      // 鼠标松开或触摸结束绑定的函数
-     _handleMouseup: function() {
-         const self = this
-         const direction = self.Cube.nextDir
-         self.Jumper.up(direction,this.Guide,flying,landing)
-         function flying(){
-             // 每一次的变化，渲染器都要重新渲染，才能看到渲染效果
-             self._render(self.scene, self.Camera.camera)
-             requestAnimationFrame(function() {
-                 self._handleMouseup()
-             })
-         }
+    _handleMouseup: function() {
+        const self = this
+        self.Jump.duringFlying(renderAgain,landing)
+        function renderAgain(){
+            self._render()
+            requestAnimationFrame(function() {
+                self._handleMouseup()
+            })
+        }
+
          function landing(){
              self._checkInCube()
-             if (self.falledStat.location === 1) {
-                 // 掉落成功，进入下一步
+              if (
+                  (self.falledStat.location === 1) 
+              ){
+                   // 掉落成功，进入下一步
                  self.score++
                  self.Cube.add()
                  self.Camera.update() // 更新相机坐标
@@ -244,6 +242,8 @@ Game.prototype = {
     _falling: function() {
         const j = this.Jumper.jumper
         var self = this
+
+
         if (self.falledStat.location === 0) {
             self._fallingRotate('none')
         } else if (self.falledStat.location === -10) {
@@ -281,6 +281,7 @@ Game.prototype = {
      **/
     _checkInCube: function() {
         if (this.Cube.cubes.length > 1) {
+            
             // jumper 的位置
             var pointO ={// this.Jumper.jumper.position
                 x: this.Jumper.jumper.position.x,
@@ -299,6 +300,7 @@ Game.prototype = {
                 x: lastCube.position.x,
                 z: lastCube.position.z
             }
+
             var distanceS, // jumper和当前方块的坐标轴距离
                 distanceL // jumper和下一个方块的坐标轴距离
             // 判断下一个方块相对当前方块的方向来确定计算距离的坐标轴
