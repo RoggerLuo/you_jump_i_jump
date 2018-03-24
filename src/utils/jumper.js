@@ -51,6 +51,9 @@ export default {
         if (!self.status.ready && self.jumper.scale.y > 0.02) { 
             self.jumper.scale.y -= 0.01
 
+            // xSpeedAlgorithm(self.status)
+            // self.Guide.xSpeed = xSpeed
+
 
             // self.status.compress -= 0.005
             // console.log('self.jumper.scale.y',self.jumper.scale.y)
@@ -58,7 +61,6 @@ export default {
 
             // self.jumper.geometry.translate(0, self.status.compress, 0)
             // self.status.xSpeed += 0.006 //线性 增加速度 //0.004
-            xSpeedAlgorithm(self.status)
             self.status.ySpeed += 0.01
             /* 
                 ySpeed, 这个决定了它可以跳多高，
@@ -141,8 +143,11 @@ export default {
 }
 
 const curveFunc = x => { //曲线正比例函数
-    //y=log(x+0.1) +1
-    return Math.log(x+0.1) + 1
+    if(x>1){
+        return Math.logx + 1        
+    }else{
+        return Math.pow(x,3)
+    }
 }
 function xSpeedAlgorithm(status){
     status.counter += 1

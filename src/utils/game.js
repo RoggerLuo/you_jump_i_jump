@@ -3,6 +3,7 @@ import Camera from './camera'
 import Cube from './cube'
 import Jumper from './jumper'
 import Guide from './guide'
+import Time from './Time'
 
 function Game() {
     // 基本参数
@@ -40,6 +41,7 @@ function Game() {
     this.Jumper = Jumper
     this.Jumper.init(this.scene)
     this.Guide = Guide
+    this.Time = Time
 }
 
 Game.prototype = {
@@ -66,6 +68,8 @@ Game.prototype = {
         // 事件绑定到canvas中
         var canvas = document.querySelector('canvas')
         canvas.addEventListener(mouseEvents.down, function() {
+            self.Time.clear()
+
             self.Jumper.jumper.geometry.translate(0, 1, 0)
             self.Jumper.jumper.position.y = 1
 
@@ -87,6 +91,47 @@ Game.prototype = {
             self._handleWindowResize()
         })
     },
+    _handleMousedown: function() {
+       const self = this
+       //这个scale属性是高度，按得越久高度越矮
+        Jumper.press((xSpeed)=>{
+           
+            self.Time.record()           
+            self._render(self.scene, self.Camera.camera) //这个render要改
+            requestAnimationFrame(function() {
+                self._handleMousedown()
+            })
+        })
+    },
+     // 鼠标松开或触摸结束绑定的函数
+     _handleMouseup: function() {
+         const self = this
+         const direction = self.Cube.nextDir
+         self.Jumper.up(direction,this.Guide,flying,landing)
+         function flying(){
+             // 每一次的变化，渲染器都要重新渲染，才能看到渲染效果
+             self._render(self.scene, self.Camera.camera)
+             requestAnimationFrame(function() {
+                 self._handleMouseup()
+             })
+         }
+         function landing(){
+             self._checkInCube()
+             if (self.falledStat.location === 1) {
+                 // 掉落成功，进入下一步
+                 self.score++
+                 self.Cube.add()
+                 self.Camera.update() // 更新相机坐标
+                 if (self.successCallback) {
+                     self.successCallback(self.score)
+                 }
+             } else {
+                 // 掉落失败，进入失败动画
+                 self._falling()
+             }
+         }
+     },
+
     // 游戏失败重新开始的初始化配置
     restart: function() {
         this.score = 0
@@ -131,51 +176,6 @@ Game.prototype = {
         this.Camera.resize(this.size)
         this.renderer.setSize(this.size.width, this.size.height)
         this._render()
-    },
-    /**
-     *鼠标按下或触摸开始绑定的函数
-     *根据鼠标按下的时间来给 xSpeed 和 ySpeed 赋值
-     *@return {Number} this.jumperStat.xSpeed 水平方向上的速度
-     *@return {Number} this.jumperStat.ySpeed 垂直方向上的速度
-     **/
-   _handleMousedown: function() {
-       const self = this
-       //这个scale属性是高度，按得越久高度越矮
-       Jumper.press((xSpeed)=>{
-          self.Guide.xSpeed = xSpeed
-          self._render(self.scene, self.Camera.camera) //这个render要改
-          requestAnimationFrame(function() {
-             self._handleMousedown()
-          })
-       })
-   },
-    // 鼠标松开或触摸结束绑定的函数
-    _handleMouseup: function() {
-        const self = this
-        const direction = self.Cube.nextDir
-        self.Jumper.up(direction,this.Guide,flying,landing)
-        function flying(){
-            // 每一次的变化，渲染器都要重新渲染，才能看到渲染效果
-            self._render(self.scene, self.Camera.camera)
-            requestAnimationFrame(function() {
-                self._handleMouseup()
-            })
-        }
-        function landing(){
-            self._checkInCube()
-            if (self.falledStat.location === 1) {
-                // 掉落成功，进入下一步
-                self.score++
-                self.Cube.add()
-                self.Camera.update() // 更新相机坐标
-                if (self.successCallback) {
-                    self.successCallback(self.score)
-                }
-            } else {
-                // 掉落失败，进入失败动画
-                self._falling()
-            }
-        }
     },
 
   /**

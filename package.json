@@ -4,7 +4,7 @@
   "description": "you jump i jump",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack-dev-server -d --progress --colors --inline --hot --port 8000 --host 172.16.1.178",
+    "dev": "webpack-dev-server -d --progress --colors --inline --hot --port 8000",
     "build": "NODE_ENV=production webpack -p colors",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
