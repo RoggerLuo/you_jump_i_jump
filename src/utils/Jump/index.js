@@ -2,7 +2,7 @@ import shape from './shape'
 import algorithm from './algorithm'
 const rateY = 0.2
 const startSpeedY = 1.5
-const gravity = 0.15
+const gravity = 0.12
 
 export default {
     init(jumper,Cube){
@@ -15,7 +15,6 @@ export default {
         this.jumper.position.y = 1
     },
     duringPressing(cb){
-        console.log(this.framesNum)
         if(this.status === 'press'){
             shape.getFat(this.jumper)
             this.framesNum += 1
@@ -27,10 +26,12 @@ export default {
         this.jumper.geometry.translate(0, -1, 0)
         this.jumper.position.y = 2
         this.computeHorizontalSpeed()  
+        this.time = this.countTime()
     },
     duringFlying(renderAgain,landing_cb){
         shape.getFit(this.jumper)
         if (this.jumper.position.y >= 2) { //flying 执行很多次
+            this.airRotate()
             renderAgain()
             this.changeXZ()
             this.changeY()
@@ -48,11 +49,15 @@ export default {
         this.status = 'normal'
         shape.reborn(this.jumper)
         this.jumper.position.y = 2
+        this.time=0
+        this.timePassed = 0
     },
     onLand(landing_cb){
         this.restart(this.jumper)
         landing_cb()
     },
+    timePassed:0,
+    time:0,
     framesNum: 0,
     jumper: undefined,
     status: 'normal',
@@ -77,7 +82,7 @@ export default {
         this.speed.horizontal = { x, z }
     },
     countTime(){
-        let fakeSpeedY = startSpeedY + this.framesNum * rateY
+        let fakeSpeedY = startSpeedY //+ algorithm(this.framesNum) //this.framesNum * rateY
         let fakePositionY = 2 
         let counter = 0
         while(fakePositionY>=2){
@@ -85,7 +90,26 @@ export default {
             fakeSpeedY -= gravity
             counter += 1
         }        
+        // console.log(counter)
         return counter
+    },
+    airRotate() { //t为总帧数
+        const reserveNum = 5
+        const j = this.jumper
+        const unit = (2*Math.PI/(this.time-reserveNum*2))
+        this.timePassed += 1
+
+        const realPassed = (this.timePassed-reserveNum)
+        if( (realPassed>= 0) && (realPassed<=(this.time-reserveNum*2) ) ){
+            console.log(realPassed)
+            const rotationValue = realPassed*unit
+            if (this.Cube.nextDir === 'left') {
+                j.rotation['z'] = rotationValue
+            }else{
+                j.rotation['x'] = - rotationValue
+            }            
+        }
+
     }
 }
 
