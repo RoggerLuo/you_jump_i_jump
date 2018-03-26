@@ -4,9 +4,12 @@ import * as THREE from 'three'
 
 export default {
     init({width,height},renderer,scene){
-        this.camera = new THREE.OrthographicCamera(width/ -80, width/ 80, height/ 80, height/ -80, 0, 5000)
+        // this.camera = new THREE.PerspectiveCamera(width/ -80, width/ 80, height/ 80, height/ -80, 0, 5000)
+        this.camera = new THREE.PerspectiveCamera(8, width / height, 1, 5000 );
         this.render = ()=>renderer.render(scene, this.camera)
         this.newPos()
+        this.camera.zoom = 1
+        this.camera.updateProjectionMatrix() 
     },
     pos:{},
     newPos(){

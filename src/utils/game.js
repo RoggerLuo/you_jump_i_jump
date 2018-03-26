@@ -62,6 +62,25 @@ Game.prototype = {
         this.Camera.update() // 更新相机坐标
         this._listen()
     },
+    // 游戏失败重新开始的初始化配置
+    restart: function() {
+        this.score = 0
+        this.Camera.newPos()
+        this.fallingStat = {
+            speed: 0.2,
+            end: false
+        }
+        this.Cube.removeAll()
+        this.scene.remove(this.Jumper.jumper)
+        // 显示的分数设为 0
+        this.successCallback(this.score)
+        this.Cube.add()
+        this.Cube.add()
+        this.Jumper.create()
+        this.Camera.update() // 更新相机坐标
+        this.Jump.restart(this.Jumper.jumper)
+    },
+
     _listen() {
         var self = this
         var mouseEvents = (self.config.isMobile) ? {
@@ -74,10 +93,6 @@ Game.prototype = {
         // 事件绑定到canvas中
         var canvas = document.querySelector('canvas')
         canvas.addEventListener(mouseEvents.down, function() {
-            // self.Time.clear()
-            // self.Jumper.jumper.geometry.translate(0, 1, 0)
-            // self.Jumper.jumper.position.y = 1
-            // self.Guide.computeProportion(self.Cube,self.Jumper)
             self.Jump.onPress()
             self._handleMousedown()
         })
@@ -130,25 +145,7 @@ Game.prototype = {
          }
      },
 
-    // 游戏失败重新开始的初始化配置
-    restart: function() {
-        this.score = 0
-        this.Camera.newPos()
-        this.fallingStat = {
-            speed: 0.2,
-            end: false
-        }
-        this.Cube.removeAll()
-        this.scene.remove(this.Jumper.jumper)
-        // 显示的分数设为 0
-        this.successCallback(this.score)
-        this.Cube.add()
-        this.Cube.add()
-        this.Jumper.create()
-        this.Camera.update() // 更新相机坐标
-
-    },
-    // 游戏成功的执行函数, 外部传入
+      // 游戏成功的执行函数, 外部传入
     addSuccessFn: function(fn) {
         this.successCallback = fn
     },
