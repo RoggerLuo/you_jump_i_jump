@@ -1,0 +1,62 @@
+<div class="navbar">
+    <div class="navbar-inner">
+        <div class="left">
+            <a href="#" class="link icon-only back">
+                <i class="iconfont icon-fanhui-baise"></i>
+            </a>
+        </div>
+        <div class="center sliding">我的待办</div>
+    </div>
+</div>
+
+<div class="pages navbar-through">
+    <div data-page="todo-list" class="page no-toolbar">
+        <div class="page-content infinite-scroll infinite-query-scroll">
+            <div id="todo-list-search" style="margin-top: -50px;">
+                <form class="searchbar searchbar-init">
+                    <div class="searchbar-input">
+                        <input type="search" id="list-search-input">
+                        <a href="#" class="searchbar-clear list-searchbar-clear"></a>
+                    </div>
+                    <a class="list-searchbar-cancel" id="list-searchbar-cancel">取消</a>
+                    <div class="search-tips list-search-tips">
+                        <span><i class="iconfont icon-sousuowujieguo"></i> 搜索</span>
+                    </div>
+                </form>
+            </div>
+            <div class="buttons-row">
+                <a href="#tab-pending" class="button active tab-link">待办</a>
+                <a href="#tab-approved" class="button tab-link">已办</a>
+                <a href="#tab-proxy" class="button tab-link">代理</a>
+            </div>
+            <div class="tabs">
+                <div id="tab-pending" class="tab active">
+                    <div class="list-block media-list">
+                        <ul class="flow-list" id="todo-pending"></ul>
+                    </div>
+                    <div class="infinite-scroll-preloader" id="todo-pending-loading" style="display: none;">
+                        <div class="preloader"></div>
+                    </div>
+                </div>
+                <div id="tab-approved" class="tab">
+                    <div class="list-block media-list">
+                        <ul class="flow-list" id="todo-approved"></ul>
+                    </div>
+                    <div class="infinite-scroll-preloader" id="todo-approved-loading" style="display: none;">
+                        <div class="preloader"></div>
+                    </div>
+                </div>
+                <div id="tab-proxy" class="tab"></div>
+            </div>
+            <div class="query-result-list">
+                <div class="list-block media-list">
+                    <ul class="flow-list" id="query-result-list"></ul>
+                </div>
+                <div class="infinite-scroll-preloader" id="query-result-list-loading" style="display: none;">
+                    <div class="preloader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

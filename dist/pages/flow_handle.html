@@ -1,0 +1,66 @@
+<div class="navbar">
+    <div class="navbar-inner">
+        <div class="left">
+            <a href="#" class="link icon-only back">
+                <i class="iconfont icon-fanhui-baise"></i>
+            </a>
+        </div>
+        <div class="center sliding">处理</div>
+    </div>
+</div>
+
+<div class="pages navbar-through toolbar-through">
+    <div data-page="handle" class="page">
+        <div class="page-content" style="padding-bottom: 0px;">
+            <div class="list-block">
+                <ul id="flow-handle-from"></ul>
+            </div>
+            <div class="handle-block">
+                <div class="handle-content">
+                    <div class="approval-opinion">审批意见</div>
+                    <div class="approval-content">
+                        <textarea placeholder="输入审批意见..." style="resize: none" id="flow-comment-textarea"></textarea>
+                    </div>
+
+
+                    <!--<div class="approval-result-btns" id="normalApprovalResult">-->
+                        <!--<div class="result-btn-item" data-id="Pass">通过</div>-->
+                        <!--<div class="result-btn-item" data-id="SignPass" id="signature-btn">签字通过</div>-->
+                        <!--<div class="result-btn-item" data-id="Deny" id="handle-deny">否决</div>-->
+                        <!--<div class="result-btn-item large" data-id="BackToFirst">退回到发起人</div>-->
+                        <!--<div class="result-btn-item large" data-id="Back" id="handle-back-btn">退回到上级审批</div>-->
+                    <!--</div>-->
+
+                    <div class="approval-attachment">添加附件</div>
+                    <div class="approval-attachment-btn">
+                        <div class="attachment-btn-icon"><i class="iconfont icon-tianjia-lanse"></i></div>
+                        <div class="attachment-btn-text">点击上传附件</div>
+                    </div>
+                    <div class="list-block">
+                        <ul style="padding-left: 0px; padding-bottom: 0px; margin-top: 10px; background: white;" class="file-list" id="approval-attachment-result"></ul>
+                    </div>
+
+                    <div class="approval-result">审批结果</div>
+                    <div class="approval-result-btns" id="artificialApprovalResult"></div>
+
+                    <div class="approval-operator-plus-block">
+                        <div id="handle-next-approver-container"></div>
+                        <div id="handle-sub-process-container"></div>
+                        <div id="handle-next-circulation-container"></div>
+                    </div>
+                </div>
+                <div class="handle-save">保存</div>
+                <div class="handle-free-btns">
+                    <div class="handle-free-item handle-next-approver">选择下级审批人</div>
+                    <div class="handle-free-item handle-finsih">结束</div>
+                    <div class="handle-free-item handle-submit">提交</div>
+                </div>
+                <div class="handle-signature">
+                    <img id="signature-img" width="57" height="100">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
